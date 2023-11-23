@@ -1,20 +1,51 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import RoomItem from "./room/RoomItem";
+import { IRoom } from "@/backend/modles/Room";
+import CustomPagination from "./layout/CustomPagination";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
-const Home = () => {
+interface Props {
+  data: {
+    success: boolean;
+    resPerPage: number;
+    filteredRoomsCount: number;
+    rooms: IRoom[];
+  };
+}
+
+const Home = ({ data }: Props) => {
+  const searchParams = useSearchParams();
+  const location = searchParams.get("location");
+
+  const { resPerPage, filteredRoomsCount, rooms } = data;
   return (
     <div>
       <section id="rooms" className="container mt-5">
-        <h2 className="mb-3 ml-2 stays-heading">All Rooms</h2>
-        <a href="/search" className="ml-2 back-to-search">
-          <i className="fa fa-arrow-left"></i> Back to Search
-        </a>
+        <h2 className="mb-3 ml-2  stays-heading">
+          {location
+            ? `${filteredRoomsCount} rooms found in "${location}"`
+            : "All Rooms"}
+        </h2>
+        <Link href="/search" className="ml-2 back-to-search">
+          <i className="fa fa-arrow-left me-1"></i> Back to Search
+        </Link>
         <div className="row mt-4">
-          <RoomItem />
+          {rooms?.length === 0 ? (
+            <div className="alret alret-danger mt-5 w-100">
+              <b>No Rooms.</b>
+            </div>
+          ) : (
+            rooms?.map((room) => <RoomItem key={room._id} room={room} />)
+          )}
         </div>
       </section>
+      <CustomPagination
+        resPerPage={resPerPage}
+        filteredRoomsCount={filteredRoomsCount}
+      />
     </div>
   );
 };
